@@ -5,8 +5,36 @@ This guide will help you configure the GitLab CI/CD pipeline for the daily incid
 ## 📋 Prerequisites Checklist
 
 - ✅ GitLab repository with CI/CD enabled
+- ✅ Python 3.9+ 
+- ✅ [uv](https://docs.astral.sh/uv/) for dependency management
 - ⏰ Slack webhook URL for notifications
 - 🔑 GitLab CI/CD variables configured
+
+## 🚀 Quick Setup
+
+### 1. Install uv (if not already installed)
+```bash
+# macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Or with pip
+pip install uv
+```
+
+### 2. Install Dependencies
+```bash
+# Create virtual environment and install dependencies
+uv sync
+```
+
+### 3. Test Locally
+```bash
+# Test the counter script (shows what would be sent to Slack)
+TEST_MODE=true uv run python scripts/check_incident_counter.py
+
+# Reset counter when incident occurs
+uv run python scripts/reset_counter.py --date 2025-06-25 --description "Brief description"
+```
 
 ## 🔧 Required GitLab CI/CD Variables
 
@@ -70,7 +98,7 @@ When an incident occurs, you have two options:
 ### Option 1: Use the Reset Script (Recommended)
 
 ```bash
-python scripts/reset_counter.py \
+uv run python scripts/reset_counter.py \
   --date 2025-06-25 \
   --description "Database connection timeout" \
   --postmortem "https://company.com/postmortem/123" \
@@ -131,6 +159,7 @@ The system automatically recognizes these milestones:
 ```
 reliability-culture/
 ├── .gitlab-ci.yml           # GitLab CI/CD configuration
+├── pyproject.toml           # Python project dependencies
 ├── last_incident.json       # Stores last incident data
 ├── README.md                # Project documentation
 ├── SETUP.md                 # This setup guide
@@ -138,6 +167,13 @@ reliability-culture/
     ├── check_incident_counter.py  # Main counter script
     └── reset_counter.py           # Incident reset script
 ```
+
+## ✅ Benefits of Using uv
+
+- **🚀 Fast**: Much faster than pip for dependency resolution and installation
+- **🔄 Consistent**: Same dependency versions locally and in CI
+- **💾 Cached**: Virtual environments are cached in GitLab CI
+- **🎯 Modern**: Built-in virtual environment management
 
 ## ✅ Verification Checklist
 
