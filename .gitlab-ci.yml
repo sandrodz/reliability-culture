@@ -11,14 +11,22 @@ daily-incident-counter:
     - if: $CI_PIPELINE_SOURCE == "schedule"
     - if: $CI_PIPELINE_SOURCE == "web"
   before_script:
-    - apt-get update && apt-get install -y git curl jq
-    - pip install requests python-dateutil
+    - pip install uv
+    - uv sync --frozen
   script:
-    - python scripts/check_incident_counter.py
+    - uv run python scripts/check_incident_counter.py
   artifacts:
     paths:
       - last_incident.json
     expire_in: 1 week
+  cache:
+    key: 
+      prefix: "${CI_COMMIT_REF_SLUG}"
+      files:
+        - pyproject.toml
+        - uv.lock
+    paths:
+      - .venv/
   only:
     variables:
       - $SLACK_WEBHOOK_URL
