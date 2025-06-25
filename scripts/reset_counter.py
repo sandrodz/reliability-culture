@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Reset incident counter script
 Use this when an incident occurs to reset the counter and notify the team

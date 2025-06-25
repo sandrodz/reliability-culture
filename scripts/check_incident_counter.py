@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Daily incident counter script for GitLab CI/CD
 Calculates days since last incident and posts to Slack
