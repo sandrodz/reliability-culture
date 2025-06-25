@@ -164,8 +164,11 @@ def main():
     
     # Check for required environment variables
     slack_webhook = os.getenv('SLACK_WEBHOOK_URL')
-    if not slack_webhook:
+    test_mode = os.getenv('TEST_MODE', 'false').lower() == 'true'
+    
+    if not slack_webhook and not test_mode:
         print("❌ Error: SLACK_WEBHOOK_URL environment variable not set")
+        print("💡 Tip: For local testing, set TEST_MODE=true")
         sys.exit(1)
     
     # Load incident data
@@ -176,14 +179,31 @@ def main():
     days_since = calculate_days_since_incident(data['last_incident_date'])
     print(f"📈 Days since last incident: {days_since}")
     
-    # Format and send Slack message
+    # Format message
     message = format_slack_message(data, days_since)
     
-    if send_slack_message(slack_webhook, message):
-        print("✅ Daily incident counter update completed successfully")
+    if test_mode:
+        print("🧪 TEST MODE: Would send this message to Slack:")
+        print("=" * 50)
+        print(f"Text: {message['text']}")
+        for block in message.get('blocks', []):
+            if block['type'] == 'header':
+                print(f"Header: {block['text']['text']}")
+            elif block['type'] == 'section':
+                if 'text' in block:
+                    print(f"Section: {block['text']['text']}")
+                elif 'fields' in block:
+                    for field in block['fields']:
+                        print(f"Field: {field['text']}")
+        print("=" * 50)
+        print("✅ Test completed successfully")
     else:
-        print("❌ Failed to send Slack message")
-        sys.exit(1)
+        # Send to Slack
+        if send_slack_message(slack_webhook, message):
+            print("✅ Daily incident counter update completed successfully")
+        else:
+            print("❌ Failed to send Slack message")
+            sys.exit(1)
 
 
 if __name__ == "__main__":
