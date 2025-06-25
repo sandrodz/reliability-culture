@@ -1,7 +1,7 @@
 # 🧭 Introducing "Days Without Incident"  
 ### A Culture of Reliability, One Day at a Time
 
-At **Nexus**, we are committed to building stable, trustworthy, and resilient banking solutions. In a world where reliability is everything, every day without an incident is a win — not just for our customers, but for all of us.
+We are committed to building stable, trustworthy, and resilient banking solutions. In a world where reliability is everything, every day without an incident is a win — not just for our customers, but for all of us.
 
 We’re excited to introduce a new initiative:
 
