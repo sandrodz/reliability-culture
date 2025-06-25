@@ -1,0 +1,24 @@
+stages:
+  - incident-counter
+
+variables:
+  SLACK_WEBHOOK_URL: "${SLACK_WEBHOOK_URL}"  # Set this in GitLab CI/CD variables
+
+daily-incident-counter:
+  stage: incident-counter
+  image: python:3.9-slim
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "web"
+  before_script:
+    - apt-get update && apt-get install -y git curl jq
+    - pip install requests python-dateutil
+  script:
+    - python scripts/check_incident_counter.py
+  artifacts:
+    paths:
+      - last_incident.json
+    expire_in: 1 week
+  only:
+    variables:
+      - $SLACK_WEBHOOK_URL
