@@ -6,13 +6,13 @@ Calculates days since last incident and posts to Slack
 import json
 import os
 import sys
-from datetime import datetime, date
+from datetime import date
 from dateutil.parser import parse
 import requests
 
 
 def load_incident_data():
-    """Load the last incident data from JSON file"""
+    """Load the incident history from JSON file"""
     try:
         with open('last_incident.json', 'r') as f:
             return json.load(f)
@@ -24,14 +24,22 @@ def load_incident_data():
         sys.exit(1)
 
 
-def save_incident_data(data):
-    """Save incident data back to JSON file"""
-    with open('last_incident.json', 'w') as f:
-        json.dump(data, f, indent=2)
+def get_last_incident_date(incidents):
+    """Get the date of the most recent incident"""
+    if not incidents:
+        return None
+
+    # Sort incidents by date (most recent first)
+    sorted_incidents = sorted(incidents, key=lambda x: x['date'], reverse=True)
+    return sorted_incidents[0]['date']
 
 
-def calculate_days_since_incident(last_incident_date_str):
-    """Calculate days since the last incident"""
+def calculate_days_since_incident(incidents):
+    """Calculate days since the most recent incident"""
+    last_incident_date_str = get_last_incident_date(incidents)
+    if not last_incident_date_str:
+        return 0
+
     try:
         last_incident_date = parse(last_incident_date_str).date()
         today = date.today()
@@ -40,6 +48,31 @@ def calculate_days_since_incident(last_incident_date_str):
     except ValueError as e:
         print(f"Error parsing date '{last_incident_date_str}': {e}")
         sys.exit(1)
+
+
+def calculate_record_streak(incidents):
+    """Calculate the longest streak between any two incidents"""
+    if len(incidents) < 2:
+        # If we have 0 or 1 incidents, current streak is the record
+        return calculate_days_since_incident(incidents)
+    
+    # Sort incidents by date (oldest first)
+    sorted_incidents = sorted(incidents, key=lambda x: x['date'])
+    
+    max_streak = 0
+    
+    # Calculate streaks between consecutive incidents
+    for i in range(len(sorted_incidents) - 1):
+        start_date = parse(sorted_incidents[i]['date']).date()
+        end_date = parse(sorted_incidents[i + 1]['date']).date()
+        streak = (end_date - start_date).days
+        max_streak = max(max_streak, streak)
+    
+    # Also check current streak (from last incident to today)
+    current_streak = calculate_days_since_incident(incidents)
+    max_streak = max(max_streak, current_streak)
+    
+    return max_streak
 
 
 def get_milestone_message(days):
@@ -59,15 +92,13 @@ def get_milestone_message(days):
     return None
 
 
-def format_slack_message(data, days_since):
+def format_slack_message(data, days_since, record_streak):
     """Format the Slack message"""
-    # Update record if this is a new record
-    if days_since > data.get('record_streak', 0):
-        data['record_streak'] = days_since
-        save_incident_data(data)
-        record_note = f" 🏆 *NEW RECORD!* 🏆"
-    else:
-        record_note = f" (Record: {data.get('record_streak', 0)} days)"
+    last_incident_date = get_last_incident_date(data['incidents'])
+    
+    # Check if this is a new record
+    # New record is defined as a streak that is greater or equal to the previous record
+    is_new_record = days_since > 0 and days_since == record_streak
     
     # Base message
     if days_since == 0:
@@ -109,16 +140,26 @@ def format_slack_message(data, days_since):
                     },
                     {
                         "type": "mrkdwn",
-                        "text": f"*Last Incident:*\n{data['last_incident_date']}"
+                        "text": f"*Last Incident:*\n{last_incident_date or 'None recorded'}"
                     },
                     {
                         "type": "mrkdwn",
-                        "text": f"*Record Streak:*\n{data.get('record_streak', 0)} days"
+                        "text": f"*Record Streak:*\n{record_streak} days"
                     }
                 ]
             }
         ]
     }
+    
+    # Add new record celebration if applicable
+    if is_new_record:
+        message["blocks"].append({
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": "🎊 *NEW RECORD!* 🎊\nThis is now the longest streak in company history!"
+            }
+        })
     
     # Add milestone celebration if applicable
     milestone_msg = get_milestone_message(days_since)
@@ -138,7 +179,7 @@ def format_slack_message(data, days_since):
             "elements": [
                 {
                     "type": "mrkdwn",
-                    "text": "Every day without an incident is a win for our customers and our team! 💪"
+                    "text": f"Total incidents recorded: {len(data['incidents'])} | Every day without an incident is a win! 💪"
                 }
             ]
         })
@@ -173,14 +214,21 @@ def main():
     
     # Load incident data
     data = load_incident_data()
-    print(f"📊 Last incident date: {data['last_incident_date']}")
+    incidents = data.get('incidents', [])
     
-    # Calculate days since incident
-    days_since = calculate_days_since_incident(data['last_incident_date'])
+    last_incident_date = get_last_incident_date(incidents)
+    print(f"📊 Last incident date: {last_incident_date or 'None recorded'}")
+    print(f"📈 Total incidents recorded: {len(incidents)}")
+    
+    # Calculate metrics
+    days_since = calculate_days_since_incident(incidents)
+    record_streak = calculate_record_streak(incidents)
+    
     print(f"📈 Days since last incident: {days_since}")
+    print(f"🏆 Record streak: {record_streak}")
     
     # Format message
-    message = format_slack_message(data, days_since)
+    message = format_slack_message(data, days_since, record_streak)
     
     if test_mode:
         print("🧪 TEST MODE: Would send this message to Slack:")
@@ -195,6 +243,9 @@ def main():
                 elif 'fields' in block:
                     for field in block['fields']:
                         print(f"Field: {field['text']}")
+            elif block['type'] == 'context':
+                for element in block['elements']:
+                    print(f"Context: {element['text']}")
         print("=" * 50)
         print("✅ Test completed successfully")
     else:

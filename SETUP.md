@@ -93,31 +93,31 @@ Keep up the great work, team! 💪
 
 ## 🔄 Managing Incidents
 
-When an incident occurs, you have two options:
+When an incident occurs, use the reset script to add it to the incident history:
 
-### Option 1: Use the Reset Script (Recommended)
+### Add New Incident
 
 ```bash
 uv run python scripts/reset_counter.py \
   --date 2025-06-25 \
   --description "Database connection timeout" \
+  --severity "Sev2" \
   --postmortem "https://company.com/postmortem/123" \
   --notify
 ```
 
-### Option 2: Manual Update
+### Parameters
+- `--date`: Incident date (defaults to today)
+- `--description`: Brief description of what happened
+- `--severity`: Incident severity (Sev1, Sev2, etc.)
+- `--postmortem`: Link to postmortem document
+- `--notify`: Send Slack notification about the incident
 
-Edit the `last_incident.json` file directly:
-
-```json
-{
-  "date": "2025-06-25",
-  "description": "Database connection timeout",
-  "postmortem_url": "https://company.com/postmortem/123"
-}
-```
-
-Then commit and push the changes.
+### What Happens
+- Incident is added to the history in `last_incident.json`
+- Counter automatically resets (0 days since last incident)
+- Record streak is preserved and calculated from historical data
+- Optional Slack notification about the incident
 
 ## 🏆 Milestone Celebrations
 

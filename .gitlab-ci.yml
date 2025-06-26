@@ -15,10 +15,6 @@ daily-incident-counter:
     - uv sync --frozen
   script:
     - uv run python scripts/check_incident_counter.py
-  artifacts:
-    paths:
-      - last_incident.json
-    expire_in: 1 week
   cache:
     key: 
       prefix: "${CI_COMMIT_REF_SLUG}"
