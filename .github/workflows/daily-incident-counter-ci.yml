@@ -1,0 +1,27 @@
+name: Daily Incident Counter
+
+on:
+  schedule:
+    - cron: '0 7 * * *'  # Every day at 07:00 UTC
+  workflow_dispatch:  # Manual trigger equivalent to GitLab's "web"
+
+jobs:
+  daily-incident-counter:
+    runs-on: ubuntu-latest
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        run: pip install uv
+      - name: Cache uv dependencies
+        uses: actions/cache@v4
+        with:
+          path: .venv
+          key: ${{ runner.os }}-uv-${{ hashFiles('pyproject.toml', 'uv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-uv-
+      - name: Install dependencies with uv
+        run: uv sync --frozen
+      - name: Run incident counter
+        run: uv run python -m scripts.check_incident_counter
