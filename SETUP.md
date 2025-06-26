@@ -120,7 +120,7 @@ uv run python -m scripts.reset_counter \
 - Record streak is preserved and calculated from historical data
 - Optional Slack notification about the incident
 
-## Running the Plotting Script
+## 📊 Running the Plotting Script
 ```
 uv run python -m scripts.plot_incidents
 ```
