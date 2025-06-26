@@ -3,51 +3,11 @@ Daily incident counter script for GitLab CI/CD
 Calculates days since last incident and posts to Slack
 """
 
-import json
 import os
 import sys
-from datetime import date
 from dateutil.parser import parse
 import requests
-
-
-def load_incident_data():
-    """Load the incident history from JSON file"""
-    try:
-        with open('last_incident.json', 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        print("Error: last_incident.json not found")
-        sys.exit(1)
-    except json.JSONDecodeError as e:
-        print(f"Error parsing last_incident.json: {e}")
-        sys.exit(1)
-
-
-def get_last_incident_date(incidents):
-    """Get the date of the most recent incident"""
-    if not incidents:
-        return None
-
-    # Sort incidents by date (most recent first)
-    sorted_incidents = sorted(incidents, key=lambda x: x['date'], reverse=True)
-    return sorted_incidents[0]['date']
-
-
-def calculate_days_since_incident(incidents):
-    """Calculate days since the most recent incident"""
-    last_incident_date_str = get_last_incident_date(incidents)
-    if not last_incident_date_str:
-        return 0
-
-    try:
-        last_incident_date = parse(last_incident_date_str).date()
-        today = date.today()
-        delta = today - last_incident_date
-        return delta.days
-    except ValueError as e:
-        print(f"Error parsing date '{last_incident_date_str}': {e}")
-        sys.exit(1)
+from scripts.incident_utils import load_incident_data, get_last_incident_date, calculate_days_since_incident
 
 
 def calculate_record_streak(incidents):

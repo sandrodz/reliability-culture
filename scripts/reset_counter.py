@@ -3,55 +3,11 @@ Reset incident counter script
 Use this when an incident occurs to add it to the incident history
 """
 
-import json
 import os
 import argparse
 from datetime import date
-from dateutil.parser import parse
 import requests
-
-
-def load_incident_data():
-    """Load the incident history from JSON file"""
-    try:
-        with open('last_incident.json', 'r', encoding='utf-8') as f:
-            return json.load(f)
-    except FileNotFoundError:
-        return {
-            "incidents": []
-        }
-
-
-def save_incident_data(data):
-    """Save incident history back to JSON file"""
-    with open('last_incident.json', 'w', encoding='utf-8') as f:
-        json.dump(data, f, indent=2)
-
-
-def get_last_incident_date(incidents):
-    """Get the date of the most recent incident"""
-    if not incidents:
-        return None
-
-    # Sort incidents by date (most recent first)
-    sorted_incidents = sorted(incidents, key=lambda x: x['date'], reverse=True)
-    return sorted_incidents[0]['date']
-
-
-def calculate_days_since_incident(incidents):
-    """Calculate days since the most recent incident"""
-    last_incident_date_str = get_last_incident_date(incidents)
-    if not last_incident_date_str:
-        return 0
-
-    try:
-        last_incident_date = parse(last_incident_date_str).date()
-        today = date.today()
-        delta = today - last_incident_date
-        return delta.days
-    except ValueError as e:
-        print(f"Error parsing date '{last_incident_date_str}': {e}")
-        return 0
+from scripts.incident_utils import load_incident_data, save_incident_data, calculate_days_since_incident
 
 
 def format_incident_notification(incidents, days_lost, new_incident):
