@@ -45,16 +45,52 @@ Navigate to your GitLab project → Settings → CI/CD → Variables and add:
 |--------------|------|-------|-------------|
 | `SLACK_WEBHOOK_URL` | Variable (masked) | All environments | Slack webhook URL for incident counter notifications |
 
-## 🔗 Slack Webhook Setup
+## 🔗 Slack App Setup - Create App with Manifest (Recommended)
 
 1. Go to [Slack API Apps](https://api.slack.com/apps)
-2. Create a new app or select existing app
-3. Go to **"Incoming Webhooks"**
-4. Enable incoming webhooks
-5. Click **"Add New Webhook to Workspace"**
-6. Choose the channel (e.g., `#reliability-culture`)
-7. Copy the webhook URL
-8. Add it to GitLab CI/CD variables as `SLACK_WEBHOOK_URL`
+2. Click **"Create New App"**
+3. Select **"From an app manifest"**
+4. Choose your workspace
+5. Use this JSON manifest:
+
+```json
+{
+    "display_information": {
+        "name": "reliability-culture",
+        "description": "Tracks days without incidents to promote reliability culture",
+        "background_color": "#2c3e50"
+    },
+    "features": {
+        "bot_user": {
+            "display_name": "Reliability Counter",
+            "always_online": true
+        }
+    },
+    "oauth_config": {
+        "scopes": {
+            "bot": [
+                "incoming-webhook",
+                "chat:write",
+                "chat:write.public"
+            ]
+        }
+    },
+    "settings": {
+        "org_deploy_enabled": false,
+        "socket_mode_enabled": false,
+        "is_hosted": false,
+        "token_rotation_enabled": false
+    }
+}
+```
+
+6. Click **"Create"** and then **"Install to Workspace"**
+7. Go to **"Incoming Webhooks"** in your app settings
+8. Enable incoming webhooks
+9. Click **"Add New Webhook to Workspace"**
+10. Choose the channel (e.g., `#reliability-culture`)
+11. Copy the webhook URL
+12. Add it to GitLab CI/CD variables as `SLACK_WEBHOOK_URL`
 
 ## 📅 Pipeline Schedule Setup
 
