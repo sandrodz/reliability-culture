@@ -32,7 +32,7 @@ def get_last_incident_date(incidents):
     """Get the date of the most recent incident"""
     if not incidents:
         return None
-    
+
     # Sort incidents by date (most recent first)
     sorted_incidents = sorted(incidents, key=lambda x: x['date'], reverse=True)
     return sorted_incidents[0]['date']
@@ -43,7 +43,7 @@ def calculate_days_since_incident(incidents):
     last_incident_date_str = get_last_incident_date(incidents)
     if not last_incident_date_str:
         return 0
-    
+
     try:
         last_incident_date = parse(last_incident_date_str).date()
         today = date.today()
@@ -96,7 +96,7 @@ def format_incident_notification(incidents, days_lost, new_incident):
             }
         ]
     }
-    
+
     if new_incident.get('description'):
         message["blocks"].append({
             "type": "section",
@@ -105,7 +105,7 @@ def format_incident_notification(incidents, days_lost, new_incident):
                 "text": f"*Description:*\n{new_incident['description']}"
             }
         })
-    
+
     if new_incident.get('postmortem_link'):
         message["blocks"].append({
             "type": "section",
@@ -114,11 +114,11 @@ def format_incident_notification(incidents, days_lost, new_incident):
                 "text": f"*Postmortem:*\n<{new_incident['postmortem_link']}|View Postmortem>"
             }
         })
-    
+
     message["blocks"].append({
         "type": "divider"
     })
-    
+
     message["blocks"].append({
         "type": "section",
         "text": {
@@ -126,7 +126,7 @@ def format_incident_notification(incidents, days_lost, new_incident):
             "text": "💪 *Remember:* Incidents are learning opportunities. Let's use this to make our systems even stronger!"
         }
     })
-    
+
     return message
 
 
@@ -150,18 +150,18 @@ def main():
     parser.add_argument('--postmortem', default='', help='Link to postmortem document')
     parser.add_argument('--severity', default='', help='Incident severity (e.g., Sev1, Sev2)')
     parser.add_argument('--notify', action='store_true', help='Send Slack notification')
-    
+
     args = parser.parse_args()
-    
+
     print("🚨 Adding new incident to history...")
-    
+
     # Load current data to get the streak we're losing
     current_data = load_incident_data()
     incidents = current_data.get('incidents', [])
-    
+
     # Calculate days lost (days since last incident)
     days_lost = calculate_days_since_incident(incidents)
-    
+
     # Create new incident record
     new_incident = {
         "date": args.date,
@@ -169,21 +169,21 @@ def main():
         "postmortem_link": args.postmortem,
         "severity": args.severity
     }
-    
+
     # Add incident to history
     incidents.append(new_incident)
-    
+
     # Update data
     updated_data = {
         "incidents": incidents
     }
-    
+
     # Save the new data
     save_incident_data(updated_data)
     print(f"✅ Incident added to history. Date: {args.date}")
     print(f"📊 Total incidents now: {len(incidents)}")
     print(f"📉 Streak lost: {days_lost} days")
-    
+
     # Send Slack notification if requested
     if args.notify:
         slack_webhook = os.getenv('SLACK_WEBHOOK_URL')
