@@ -7,7 +7,7 @@ import os
 import sys
 from dateutil.parser import parse
 import requests
-from scripts.incident_utils import load_incident_data, get_last_incident_date, calculate_days_since_incident
+from scripts.incident_utils import load_incident_data, get_last_incident_date, calculate_days_since_incident, load_config
 
 
 def calculate_record_streak(incidents):
@@ -35,56 +35,65 @@ def calculate_record_streak(incidents):
     return max_streak
 
 
-def get_milestone_message(days):
+def get_milestone_message(days, config):
     """Get special milestone message if applicable"""
-    milestones = {
-        10: "🎉 10 Days! Team shoutout time! 🎉",
-        30: "☕ 30 Days! Virtual coffee vouchers for everyone! ☕",
-        50: "🍽️ 50 Days! Team lunch celebration! 🍽️",
-        100: "🎁 100 Days! Custom swag incoming! 🎁"
-    }
+    milestones = config['milestones']
+    milestone_settings = config['milestone_settings']
 
-    if days in milestones:
-        return milestones[days]
-    elif days > 100 and days % 50 == 0:
-        return f"🏆 {days} Days! Amazing streak! 🏆"
+    # Check for exact milestone matches
+    if str(days) in milestones:
+        return milestones[str(days)]
+
+    # Check for recurring milestones (e.g., every 50 days after 100)
+    recurring_interval = milestone_settings['recurring_interval']
+    if days > 100 and days % recurring_interval == 0:
+        return milestone_settings['recurring_template'].format(days=days)
 
     return None
 
 
-def format_slack_message(data, days_since, record_streak):
+def get_status_for_days(days, config):
+    """Get emoji and status text for the given number of days"""
+    status_thresholds = config['status_thresholds']
+
+    for threshold in status_thresholds:
+        min_days = threshold['min_days']
+        max_days = threshold['max_days']
+
+        if max_days is None:  # No upper bound
+            if days >= min_days:
+                return threshold['emoji'], threshold['status']
+        else:
+            if min_days <= days <= max_days:
+                return threshold['emoji'], threshold['status']
+
+    # Fallback to last option if no match found
+    last_threshold = status_thresholds[-1]
+    return last_threshold['emoji'], last_threshold['status']
+
+
+def format_slack_message(data, days_since, record_streak, config):
     """Format the Slack message"""
     last_incident_date = get_last_incident_date(data['incidents'])
+    messages = config['messages']
+    slack_config = config['slack']
+    field_labels = config['field_labels']
 
     # Check if this is a new record
     # New record is defined as a streak that is greater or equal to the previous record
     is_new_record = days_since > 0 and days_since == record_streak
 
-    # Base message
-    if days_since == 0:
-        emoji = "🔄"
-        status = "Starting fresh"
-    elif days_since < 10:
-        emoji = "🌱"
-        status = "Building momentum"
-    elif days_since < 30:
-        emoji = "🌿"
-        status = "Growing strong"
-    elif days_since < 50:
-        emoji = "🌳"
-        status = "Solid foundation"
-    else:
-        emoji = "🏆"
-        status = "Excellence achieved"
+    # Get status based on configuration
+    emoji, status = get_status_for_days(days_since, config)
 
     message = {
-        "text": f"Days Without Incident: {days_since}",
+        "text": slack_config['text_template'].format(days_since=days_since),
         "blocks": [
             {
                 "type": "header",
                 "text": {
                     "type": "plain_text",
-                    "text": f"{emoji} Days Without Incident"
+                    "text": slack_config['header_template'].format(emoji=emoji)
                 }
             },
             {
@@ -92,19 +101,19 @@ def format_slack_message(data, days_since, record_streak):
                 "fields": [
                     {
                         "type": "mrkdwn",
-                        "text": f"*Current Streak:*\n{days_since} days"
+                        "text": f"{field_labels['current_streak']}\n{days_since} days"
                     },
                     {
                         "type": "mrkdwn",
-                        "text": f"*Status:*\n{status}"
+                        "text": f"{field_labels['status']}\n{status}"
                     },
                     {
                         "type": "mrkdwn",
-                        "text": f"*Last Incident:*\n{last_incident_date or 'None recorded'}"
+                        "text": f"{field_labels['last_incident']}\n{last_incident_date or messages['no_incident_fallback']}"
                     },
                     {
                         "type": "mrkdwn",
-                        "text": f"*Record Streak:*\n{record_streak} days"
+                        "text": f"{field_labels['record_streak']}\n{record_streak} days"
                     }
                 ]
             }
@@ -113,33 +122,36 @@ def format_slack_message(data, days_since, record_streak):
 
     # Add new record celebration if applicable
     if is_new_record:
+        new_record_msg = messages['new_record']
         message["blocks"].append({
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": "🎊 *NEW RECORD!* 🎊\nThis is now the longest streak in company history!"
+                "text": f"{new_record_msg['title']}\n{new_record_msg['text']}"
             }
         })
 
     # Add milestone celebration if applicable
-    milestone_msg = get_milestone_message(days_since)
+    milestone_msg = get_milestone_message(days_since, config)
     if milestone_msg:
+        milestone_config = messages['milestone_reached']
         message["blocks"].append({
             "type": "section",
             "text": {
                 "type": "mrkdwn",
-                "text": f"🎊 *MILESTONE REACHED!* 🎊\n{milestone_msg}"
+                "text": f"{milestone_config['title']}\n{milestone_msg}"
             }
         })
 
     # Add motivational footer
     if days_since > 0:
+        footer_text = messages['footer_template'].format(incident_count=len(data['incidents']))
         message["blocks"].append({
             "type": "context",
             "elements": [
                 {
                     "type": "mrkdwn",
-                    "text": f"Total incidents recorded: {len(data['incidents'])} | Every day without an incident is a win! 💪"
+                    "text": footer_text
                 }
             ]
         })
@@ -147,10 +159,11 @@ def format_slack_message(data, days_since, record_streak):
     return message
 
 
-def send_slack_message(webhook_url, message):
+def send_slack_message(webhook_url, message, config):
     """Send message to Slack via webhook"""
+    timeout = config['slack']['timeout_seconds']
     try:
-        response = requests.post(webhook_url, json=message, timeout=10)
+        response = requests.post(webhook_url, json=message, timeout=timeout)
         response.raise_for_status()
         print("✅ Slack message sent successfully")
         return True
@@ -162,6 +175,9 @@ def send_slack_message(webhook_url, message):
 def main():
     """Main function"""
     print("🚀 Starting daily incident counter check...")
+
+    # Load configuration
+    config = load_config()
 
     # Check for required environment variables
     slack_webhook = os.getenv('SLACK_WEBHOOK_URL')
@@ -188,7 +204,7 @@ def main():
     print(f"🏆 Record streak: {record_streak}")
 
     # Format message
-    message = format_slack_message(data, days_since, record_streak)
+    message = format_slack_message(data, days_since, record_streak, config)
 
     if test_mode:
         print("🧪 TEST MODE: Would send this message to Slack:")
@@ -210,7 +226,7 @@ def main():
         print("✅ Test completed successfully")
     else:
         # Send to Slack
-        if send_slack_message(slack_webhook, message):
+        if send_slack_message(slack_webhook, message, config):
             print("✅ Daily incident counter update completed successfully")
         else:
             print("❌ Failed to send Slack message")

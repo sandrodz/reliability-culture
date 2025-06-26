@@ -1,0 +1,66 @@
+{
+  "milestones": {
+    "10": "🎉 10 Days! Team shoutout time! 🎉",
+    "30": "☕ 30 Days! Virtual coffee vouchers for everyone! ☕",
+    "50": "🍽️ 50 Days! Team lunch celebration! 🍽️",
+    "100": "🎁 100 Days! Custom swag incoming! 🎁"
+  },
+  "milestone_settings": {
+    "recurring_interval": 50,
+    "recurring_template": "🏆 {days} Days! Amazing streak! 🏆"
+  },
+  "status_thresholds": [
+    {
+      "min_days": 0,
+      "max_days": 0,
+      "emoji": "🔄",
+      "status": "Starting fresh"
+    },
+    {
+      "min_days": 1,
+      "max_days": 9,
+      "emoji": "🌱",
+      "status": "Building momentum"
+    },
+    {
+      "min_days": 10,
+      "max_days": 29,
+      "emoji": "🌿",
+      "status": "Growing strong"
+    },
+    {
+      "min_days": 30,
+      "max_days": 49,
+      "emoji": "🌳",
+      "status": "Solid foundation"
+    },
+    {
+      "min_days": 50,
+      "max_days": null,
+      "emoji": "🏆",
+      "status": "Excellence achieved"
+    }
+  ],
+  "messages": {
+    "new_record": {
+      "title": "🎊 *NEW RECORD!* 🎊",
+      "text": "This is now the longest streak in company history!"
+    },
+    "milestone_reached": {
+      "title": "🎊 *MILESTONE REACHED!* 🎊"
+    },
+    "footer_template": "Total incidents recorded: {incident_count} | Every day without an incident is a win! 💪",
+    "no_incident_fallback": "None recorded"
+  },
+  "slack": {
+    "timeout_seconds": 10,
+    "header_template": "{emoji} Days Without Incident",
+    "text_template": "Days Without Incident: {days_since}"
+  },
+  "field_labels": {
+    "current_streak": "*Current Streak:*",
+    "status": "*Status:*",
+    "last_incident": "*Last Incident:*",
+    "record_streak": "*Record Streak:*"
+  }
+}

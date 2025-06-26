@@ -1,3 +1,4 @@
+import os
 import json
 from datetime import date
 from dateutil.parser import parse
@@ -45,4 +46,16 @@ def calculate_days_since_incident(incidents):
         return delta.days
     except ValueError as e:
         print(f"Error parsing date '{last_incident_date_str}': {e}")
+        sys.exit(1)
+
+def load_config():
+    """Load configuration from config.json"""
+    try:
+        with open('config.json', 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        print("❌ Error: Configuration file not found at project root")
+        sys.exit(1)
+    except json.JSONDecodeError as e:
+        print(f"❌ Error: Invalid JSON in configuration file: {e}")
         sys.exit(1)

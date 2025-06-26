@@ -171,6 +171,46 @@ reliability-culture/
     └── reset_counter.py              # Incident reset script
 ```
 
+## ⚙️ Configuration
+
+The system is highly configurable through the `config.json` file. You can customize:
+
+### 🏆 Milestones
+Configure celebration messages for different day counts:
+```json
+"milestones": {
+  "10": "🎉 10 Days! Team shoutout time! 🎉",
+  "30": "☕ 30 Days! Virtual coffee vouchers for everyone! ☕"
+}
+```
+
+### 📊 Status Thresholds  
+Define emojis and status messages for different streak ranges:
+```json
+"status_thresholds": [
+  {
+    "min_days": 1,
+    "max_days": 9,
+    "emoji": "🌱", 
+    "status": "Building momentum"
+  }
+]
+```
+
+### 💬 Message Templates
+Customize all user-facing text including:
+- New record announcements
+- Milestone celebration messages  
+- Footer motivational text
+- Field labels
+
+### 🔧 Technical Settings
+- Slack timeout duration
+- Message templates
+- Recurring milestone intervals
+
+To modify the configuration, edit `config.json` and the changes will take effect on the next run.
+
 ---
 
 🎉 **Setup Complete!** The daily incident counter will now run automatically and keep your team motivated to maintain high reliability standards.
