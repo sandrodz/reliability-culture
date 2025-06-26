@@ -191,3 +191,12 @@ reliability-culture/
 🎉 **Setup Complete!** The daily incident counter will now run automatically and keep your team motivated to maintain high reliability standards.
 
 For questions or improvements, reach out in `#reliability-culture` 😊
+
+## Running the Plotting Script
+```
+uv run python -m scripts.plot_incidents
+```
+
+This will display two plots:
+- **Days Without Incident Over Time:** Highlights the best streak group in green.
+- **Incidents Per Month:** Highlights the worst month in red.

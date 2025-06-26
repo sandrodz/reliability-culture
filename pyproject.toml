@@ -5,6 +5,7 @@ description = "Days Without Incident tracker for reliability culture"
 readme = "README.md"
 requires-python = ">=3.9"
 dependencies = [
+    "matplotlib>=3.9.4",
     "python-dateutil>=2.9.0.post0",
     "requests>=2.32.4",
 ]
