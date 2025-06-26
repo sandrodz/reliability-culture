@@ -8,9 +8,11 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from scripts.incident_utils import load_incident_data
 
+
 def parse_incident_dates(incidents):
     """Parse and return a list of incident dates as date objects."""
     return [datetime.strptime(inc['date'], '%Y-%m-%d').date() for inc in incidents]
+
 
 def plot_streak_over_time(incidents):
     """Plot a bar chart of days without incident over time, highlighting the best streak group in green."""
@@ -72,6 +74,7 @@ def plot_streak_over_time(incidents):
     plt.legend()
     plt.show()
 
+
 def plot_incident_timeline(incidents):
     """Plot a bar chart of the number of incidents per month, highlighting the worst month."""
     if not incidents:
@@ -96,12 +99,14 @@ def plot_incident_timeline(incidents):
     plt.tight_layout()
     plt.show()
 
+
 def main():
     """Main entry point: load data and plot graphs."""
     data = load_incident_data()
     incidents = data.get('incidents', [])
     plot_streak_over_time(incidents)
     plot_incident_timeline(incidents)
+
 
 if __name__ == "__main__":
     main()

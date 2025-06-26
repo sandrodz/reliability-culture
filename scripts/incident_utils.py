@@ -1,8 +1,11 @@
-import os
+"""
+Utilities.
+"""
+
+import sys
 import json
 from datetime import date
 from dateutil.parser import parse
-import sys
 
 
 def load_incident_data():
@@ -47,6 +50,7 @@ def calculate_days_since_incident(incidents):
     except ValueError as e:
         print(f"Error parsing date '{last_incident_date_str}': {e}")
         sys.exit(1)
+
 
 def load_config():
     """Load configuration from config.json"""
