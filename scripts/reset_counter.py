@@ -14,7 +14,7 @@ import requests
 def load_incident_data():
     """Load the incident history from JSON file"""
     try:
-        with open('last_incident.json', 'r') as f:
+        with open('last_incident.json', 'r', encoding='utf-8') as f:
             return json.load(f)
     except FileNotFoundError:
         return {
@@ -24,7 +24,7 @@ def load_incident_data():
 
 def save_incident_data(data):
     """Save incident history back to JSON file"""
-    with open('last_incident.json', 'w') as f:
+    with open('last_incident.json', 'w', encoding='utf-8') as f:
         json.dump(data, f, indent=2)
 
 
@@ -133,7 +133,7 @@ def format_incident_notification(incidents, days_lost, new_incident):
 def send_slack_message(webhook_url, message):
     """Send message to Slack via webhook"""
     try:
-        response = requests.post(webhook_url, json=message)
+        response = requests.post(webhook_url, json=message, timeout=10)
         response.raise_for_status()
         print("✅ Incident notification sent to Slack")
         return True

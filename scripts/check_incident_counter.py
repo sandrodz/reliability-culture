@@ -14,7 +14,7 @@ import requests
 def load_incident_data():
     """Load the incident history from JSON file"""
     try:
-        with open('last_incident.json', 'r') as f:
+        with open('last_incident.json', 'r', encoding='utf-8') as f:
             return json.load(f)
     except FileNotFoundError:
         print("Error: last_incident.json not found")
@@ -190,7 +190,7 @@ def format_slack_message(data, days_since, record_streak):
 def send_slack_message(webhook_url, message):
     """Send message to Slack via webhook"""
     try:
-        response = requests.post(webhook_url, json=message)
+        response = requests.post(webhook_url, json=message, timeout=10)
         response.raise_for_status()
         print("✅ Slack message sent successfully")
         return True
