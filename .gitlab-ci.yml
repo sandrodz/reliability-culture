@@ -14,7 +14,7 @@ daily-incident-counter:
     - pip install uv
     - uv sync --frozen
   script:
-    - uv run python scripts/check_incident_counter.py
+    - uv run python -m scripts.check_incident_counter
   cache:
     key: 
       prefix: "${CI_COMMIT_REF_SLUG}"

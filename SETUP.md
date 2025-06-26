@@ -30,10 +30,12 @@ uv sync
 ### 3. Test Locally
 ```bash
 # Test the counter script (shows what would be sent to Slack)
-TEST_MODE=true uv run python scripts/check_incident_counter.py
+TEST_MODE=true uv run python -m scripts.check_incident_counter
 
 # Reset counter when incident occurs
-uv run python scripts/reset_counter.py --date 2025-06-25 --description "Brief description"
+uv run python -m scripts.reset_counter \
+  --date 2025-06-25 \
+  --description "Brief description"
 ```
 
 ## 🔧 Required GitLab CI/CD Variables
@@ -98,7 +100,7 @@ When an incident occurs, use the reset script to add it to the incident history:
 ### Add New Incident
 
 ```bash
-uv run python scripts/reset_counter.py \
+uv run python -m scripts.reset_counter \
   --date 2025-06-25 \
   --description "Database connection timeout" \
   --severity "Sev2" \
