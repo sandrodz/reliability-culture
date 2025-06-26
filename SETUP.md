@@ -5,7 +5,6 @@ This guide will help you configure the GitLab CI/CD pipeline for the daily incid
 ## 📋 Prerequisites Checklist
 
 - ✅ GitLab repository with CI/CD enabled
-- ✅ Python 3.9+ 
 - ✅ [uv](https://docs.astral.sh/uv/) for dependency management
 - ⏰ Slack webhook URL for notifications
 - 🔑 GitLab CI/CD variables configured
@@ -121,16 +120,14 @@ uv run python -m scripts.reset_counter \
 - Record streak is preserved and calculated from historical data
 - Optional Slack notification about the incident
 
-## 🏆 Milestone Celebrations
+## Running the Plotting Script
+```
+uv run python -m scripts.plot_incidents
+```
 
-The system automatically recognizes these milestones:
-
-| Days | Celebration |
-|------|-------------|
-| 10   | 🎉 Team shoutout |
-| 30   | ☕ Virtual coffee vouchers |
-| 50   | 🍕 Team lunch |
-| 100+ | 🎁 Custom swag or surprise |
+This will display two plots:
+- **Days Without Incident Over Time:** Highlights the best streak group in green.
+- **Incidents Per Month:** Highlights the worst month in red.
 
 ## 🐛 Troubleshooting
 
@@ -160,43 +157,22 @@ The system automatically recognizes these milestones:
 
 ```
 reliability-culture/
-├── .gitlab-ci.yml           # GitLab CI/CD configuration
-├── pyproject.toml           # Python project dependencies
-├── last_incident.json       # Stores last incident data
-├── README.md                # Project documentation
-├── SETUP.md                 # This setup guide
+├── .gitlab-ci.yml                    # GitLab CI/CD configuration
+├── pyproject.toml                    # Python project dependencies
+├── uv.lock                           # uv dependency lock file
+├── last_incident.json                # Stores last incident data
+├── README.md                         # Project documentation
+├── SETUP.md                          # This setup guide
 └── scripts/
-    ├── check_incident_counter.py  # Main counter script
-    └── reset_counter.py           # Incident reset script
+    ├── __init__.py                   # Python package marker
+    ├── check_incident_counter.py     # Main counter script
+    ├── incident_utils.py             # Shared utility functions
+    ├── plot_incidents.py             # Incident visualization script
+    └── reset_counter.py              # Incident reset script
 ```
-
-## ✅ Benefits of Using uv
-
-- **🚀 Fast**: Much faster than pip for dependency resolution and installation
-- **🔄 Consistent**: Same dependency versions locally and in CI
-- **💾 Cached**: Virtual environments are cached in GitLab CI
-- **🎯 Modern**: Built-in virtual environment management
-
-## ✅ Verification Checklist
-
-- [ ] GitLab CI/CD variables configured
-- [ ] Slack webhook created and tested
-- [ ] Pipeline schedule created (daily at 9 AM)
-- [ ] Manual pipeline test successful
-- [ ] Slack message received in correct channel
-- [ ] Team knows how to report incidents
 
 ---
 
 🎉 **Setup Complete!** The daily incident counter will now run automatically and keep your team motivated to maintain high reliability standards.
 
 For questions or improvements, reach out in `#reliability-culture` 😊
-
-## Running the Plotting Script
-```
-uv run python -m scripts.plot_incidents
-```
-
-This will display two plots:
-- **Days Without Incident Over Time:** Highlights the best streak group in green.
-- **Incidents Per Month:** Highlights the worst month in red.
