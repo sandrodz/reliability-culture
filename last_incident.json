@@ -1,18 +1,11 @@
 {
   "incidents": [
     {
-      "date": "2025-06-01",
-      "description": "Initial baseline - replace with actual last incident",
+      "date": "2025-06-26",
+      "description": "Database storage issue caused a temporary outage affecting user logins, crypto, fx rate and transfer services.",
       "postmortem_link": "",
-      "severity": "baseline",
-      "duration_minutes": null
-    },
-    {
-      "date": "2025-06-25",
-      "description": "Database timeout issue",
-      "postmortem_link": "https://example.com/postmortem/123",
-      "severity": "Sev2",
-      "duration_minutes": 45
+      "severity": "Sev1",
+      "duration_minutes": 20
     }
   ]
 }
