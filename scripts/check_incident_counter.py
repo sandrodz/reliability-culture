@@ -86,44 +86,43 @@ def format_slack_message(data, days_since, record_streak, config):
     # Get status based on configuration
     emoji, status = get_status_for_days(days_since, config)
 
-    message = {
-        "text": slack_config['text_template'].format(days_since=days_since),
-        "blocks": [
-            {
-                "type": "header",
-                "text": {
-                    "type": "plain_text",
-                    "text": slack_config['header_template'].format(emoji=emoji)
-                }
-            },
-            {
-                "type": "section",
-                "fields": [
-                    {
-                        "type": "mrkdwn",
-                        "text": f"{field_labels['current_streak']}\n{days_since} days"
-                    },
-                    {
-                        "type": "mrkdwn",
-                        "text": f"{field_labels['status']}\n{status}"
-                    },
-                    {
-                        "type": "mrkdwn",
-                        "text": f"{field_labels['last_incident']}\n{last_incident_date or messages['no_incident_fallback']}"
-                    },
-                    {
-                        "type": "mrkdwn",
-                        "text": f"{field_labels['record_streak']}\n{record_streak} days"
-                    }
-                ]
+    blocks = [
+        {
+            "type": "header",
+            "text": {
+                "type": "plain_text",
+                "text": slack_config['header_template'].format(emoji=emoji)
             }
-        ]
-    }
+        },
+        {"type": "divider"},
+        {
+            "type": "section",
+            "fields": [
+                {
+                    "type": "mrkdwn",
+                    "text": f"{field_labels['current_streak']}\n{days_since} days"
+                },
+                {
+                    "type": "mrkdwn",
+                    "text": f"{field_labels['status']}\n{status}"
+                },
+                {
+                    "type": "mrkdwn",
+                    "text": f"{field_labels['last_incident']}\n{last_incident_date or messages['no_incident_fallback']}"
+                },
+                {
+                    "type": "mrkdwn",
+                    "text": f"{field_labels['record_streak']}\n{record_streak} days"
+                }
+            ]
+        }
+    ]
 
     # Add new record celebration if applicable
     if is_new_record:
         new_record_msg = messages['new_record']
-        message["blocks"].append({
+        blocks.append({"type": "divider"})
+        blocks.append({
             "type": "section",
             "text": {
                 "type": "mrkdwn",
@@ -135,7 +134,8 @@ def format_slack_message(data, days_since, record_streak, config):
     milestone_msg = get_milestone_message(days_since, config)
     if milestone_msg:
         milestone_config = messages['milestone_reached']
-        message["blocks"].append({
+        blocks.append({"type": "divider"})
+        blocks.append({
             "type": "section",
             "text": {
                 "type": "mrkdwn",
@@ -146,7 +146,8 @@ def format_slack_message(data, days_since, record_streak, config):
     # Add motivational footer
     if days_since > 0:
         footer_text = messages['footer_template'].format(incident_count=len(data['incidents']))
-        message["blocks"].append({
+        blocks.append({"type": "divider"})
+        blocks.append({
             "type": "context",
             "elements": [
                 {
@@ -155,6 +156,11 @@ def format_slack_message(data, days_since, record_streak, config):
                 }
             ]
         })
+
+    message = {
+        "text": slack_config['text_template'].format(days_since=days_since),
+        "blocks": blocks
+    }
 
     return message
 
