@@ -1,4 +1,7 @@
-# 🚀 GitLab CI/CD Incident Counter Setup Guide
+# 🚀 Incident Counter Setup Guide
+
+> **Read the project introduction on Medium:**  
+> [Introducing "Days Without Incident" – A Reliability Culture Tool](https://medium.com/@sandrodz/introducing-days-without-incident-f75d6a78127b)
 
 This guide will help you configure the GitLab CI/CD pipeline for the daily incident counter that posts to Slack.
 
