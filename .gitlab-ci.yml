@@ -8,8 +8,8 @@ daily-incident-counter:
   stage: incident-counter
   image: python:3.9-slim
   rules:
-    - if: $CI_PIPELINE_SOURCE == "schedule"
-    - if: $CI_PIPELINE_SOURCE == "web"
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $SLACK_WEBHOOK_URL'
+    - if: '$CI_PIPELINE_SOURCE == "web" && $SLACK_WEBHOOK_URL'
   before_script:
     - pip install uv
     - uv sync --frozen
@@ -23,6 +23,3 @@ daily-incident-counter:
         - uv.lock
     paths:
       - .venv/
-  only:
-    variables:
-      - $SLACK_WEBHOOK_URL
