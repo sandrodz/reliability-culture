@@ -22,6 +22,7 @@ def format_incident_notification(incidents, days_lost, new_incident):
                     "text": "🚨 Incident Reported"
                 }
             },
+            {"type": "divider"},
             {
                 "type": "section",
                 "text": {
@@ -43,19 +44,23 @@ def format_incident_notification(incidents, days_lost, new_incident):
                     {
                         "type": "mrkdwn",
                         "text": f"*Total Incidents:*\n{len(incidents)} recorded"
-                    },
-                    {
-                        "type": "mrkdwn",
-                        "text": f"*Severity:*\n{new_incident.get('severity', 'Not specified')}"
-                    },
-                    {
-                        "type": "mrkdwn",
-                        "text": f"*Duration:*\n{new_incident.get('duration_minutes', 'N/A')} minutes"
                     }
                 ]
             }
         ]
     }
+
+    # Add optional fields if present
+    if new_incident.get('severity'):
+        message["blocks"][2]["fields"].append({
+            "type": "mrkdwn",
+            "text": f"*Severity:*\n{new_incident['severity']}"
+        })
+    if new_incident.get('duration_minutes') is not None:
+        message["blocks"][2]["fields"].append({
+            "type": "mrkdwn",
+            "text": f"*Duration:*\n{new_incident['duration_minutes']} minutes"
+        })
 
     if new_incident.get('description'):
         message["blocks"].append({
@@ -80,11 +85,13 @@ def format_incident_notification(incidents, days_lost, new_incident):
     })
 
     message["blocks"].append({
-        "type": "section",
-        "text": {
-            "type": "mrkdwn",
-            "text": "💪 *Remember:* Incidents are learning opportunities. Let's use this to make our systems even stronger!"
-        }
+        "type": "context",
+        "elements": [
+            {
+                "type": "mrkdwn",
+                "text": "💪 *Remember:* Incidents are learning opportunities. Let's use this to make our systems even stronger!"
+            }
+        ]
     })
 
     return message
