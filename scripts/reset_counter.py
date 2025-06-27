@@ -52,12 +52,12 @@ def format_incident_notification(incidents, days_lost, new_incident):
 
     # Add optional fields if present
     if new_incident.get('severity'):
-        message["blocks"][2]["fields"].append({
+        message["blocks"][3]["fields"].append({
             "type": "mrkdwn",
             "text": f"*Severity:*\n{new_incident['severity']}"
         })
     if new_incident.get('duration_minutes') is not None:
-        message["blocks"][2]["fields"].append({
+        message["blocks"][3]["fields"].append({
             "type": "mrkdwn",
             "text": f"*Duration:*\n{new_incident['duration_minutes']} minutes"
         })
