@@ -47,6 +47,10 @@ def format_incident_notification(incidents, days_lost, new_incident):
                     {
                         "type": "mrkdwn",
                         "text": f"*Severity:*\n{new_incident.get('severity', 'Not specified')}"
+                    },
+                    {
+                        "type": "mrkdwn",
+                        "text": f"*Duration:*\n{new_incident.get('duration_minutes', 'N/A')} minutes"
                     }
                 ]
             }
@@ -105,6 +109,7 @@ def main():
     parser.add_argument('--description', default='', help='Brief incident description')
     parser.add_argument('--postmortem', default='', help='Link to postmortem document')
     parser.add_argument('--severity', default='', help='Incident severity (e.g., Sev1, Sev2)')
+    parser.add_argument('--duration', type=int, default=None, help='Duration of the incident in minutes')
     parser.add_argument('--notify', action='store_true', help='Send Slack notification')
 
     args = parser.parse_args()
@@ -123,7 +128,8 @@ def main():
         "date": args.date,
         "description": args.description,
         "postmortem_link": args.postmortem,
-        "severity": args.severity
+        "severity": args.severity,
+        "duration_minutes": args.duration
     }
 
     # Add incident to history

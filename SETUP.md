@@ -140,6 +140,7 @@ uv run python -m scripts.reset_counter \
   --description "Database connection timeout" \
   --severity "Sev2" \
   --postmortem "https://company.com/postmortem/123" \
+  --duration 45 \
   --notify
 ```
 
@@ -148,6 +149,7 @@ uv run python -m scripts.reset_counter \
 - `--description`: Brief description of what happened
 - `--severity`: Incident severity (Sev1, Sev2, etc.)
 - `--postmortem`: Link to postmortem document
+- `--duration`: Duration of the incident in minutes (optional)
 - `--notify`: Send Slack notification about the incident
 
 ### What Happens

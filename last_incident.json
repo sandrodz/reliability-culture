@@ -4,13 +4,15 @@
       "date": "2025-06-01",
       "description": "Initial baseline - replace with actual last incident",
       "postmortem_link": "",
-      "severity": "baseline"
+      "severity": "baseline",
+      "duration_minutes": null
     },
     {
       "date": "2025-06-25",
       "description": "Database timeout issue",
       "postmortem_link": "https://example.com/postmortem/123",
-      "severity": "Sev2"
+      "severity": "Sev2",
+      "duration_minutes": 45
     }
   ]
 }
