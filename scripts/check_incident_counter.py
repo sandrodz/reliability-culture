@@ -158,7 +158,7 @@ def format_slack_message(data, days_since, record_streak, config):
         })
 
     message = {
-        "text": slack_config['text_template'].format(days_since=days_since),
+        "text": slack_config['text_template'].format(days_since=days_since), # Shows in slack push notifications
         "blocks": blocks
     }
 
