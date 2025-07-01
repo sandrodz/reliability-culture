@@ -37,15 +37,18 @@ def get_last_incident_date(incidents):
     return sorted_incidents[0]['date']
 
 
-def calculate_days_since_incident(incidents):
-    """Calculate days since the most recent incident"""
+def calculate_days_since_incident(incidents, reference_date=None):
+    """Calculate days since the most recent incident. Optionally pass a reference date to use instead of today."""
     last_incident_date_str = get_last_incident_date(incidents)
     if not last_incident_date_str:
         return 0
     try:
         last_incident_date = parse(last_incident_date_str).date()
-        today = date.today()
-        delta = today - last_incident_date
+        if reference_date is not None:
+            ref_date = reference_date
+        else:
+            ref_date = date.today()
+        delta = ref_date - last_incident_date
         return delta.days
     except ValueError as e:
         print(f"Error parsing date '{last_incident_date_str}': {e}")

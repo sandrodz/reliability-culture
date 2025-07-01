@@ -7,6 +7,7 @@ import os
 import argparse
 from datetime import date
 import requests
+from dateutil.parser import parse
 from scripts.incident_utils import load_incident_data, save_incident_data, calculate_days_since_incident
 
 
@@ -128,7 +129,12 @@ def main():
     incidents = current_data.get('incidents', [])
 
     # Calculate days lost (days since last incident)
-    days_lost = calculate_days_since_incident(incidents)
+    try:
+        reference_date = parse(args.date).date()
+    except ValueError:
+        print(f"❌ Error: Invalid date format for --date: {args.date}. Use YYYY-MM-DD.")
+        return
+    days_lost = calculate_days_since_incident(incidents, reference_date)
 
     # Create new incident record
     new_incident = {
